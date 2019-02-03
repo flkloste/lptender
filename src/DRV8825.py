@@ -31,10 +31,10 @@ class DRV8825:
             self._gpio.output(self._gpioStep, self._gpio.levelLow())
             sleep(self._delay)
     
-    def clockWise():
+    def clockWise(self):
         return self._gpio.levelHigh()
         
-    def counterClockWise():
+    def counterClockWise(self):
         return self._gpio.levelLow()
 
 

@@ -4,8 +4,8 @@ from time import sleep
 
 
 if __name__ == "__main__":
-    gpio = GlobalGPIO()
-    elevator = Elevator(gpio)
+    gpio = GlobalGPIO.GlobalGPIO()
+    elevator = Elevator.Elevator(gpio)
     
     elevator.moveUp(200)
     sleep(1)
