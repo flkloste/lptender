@@ -10,14 +10,22 @@ class GlobalGPIO:
         GPIO.cleanup()
 
     def setup(self, gpioBcmNo, mode):
+        if mode not in [self.modeInput(), self.modeOutput()]:
+            raise RuntimeError("Paramter 'mode' has an invalid value: %s" % str(mode))
+            
         if gpioBcmNo in self.usedGPIOs:
             raise RuntimeError("GPIO %s already in use!" % str(gpioBcmNo))
+            
         GPIO.setup(gpioBcmNo, mode)
         self.usedGPIOs.append(gpioBcmNo)
     
-    def output(self, gpioBcmNo,level):
+    def output(self, gpioBcmNo, level):
+        if level not in [self.levelHigh(), self.levelLow()]:
+            raise RuntimeError("Paramter 'level' has an invalid value: %s" % str(level))
+            
         if gpioBcmNo not in self.usedGPIOs:
             raise RuntimeError("GPI %s has not been set up!" % str(gpioBcmNo))
+            
         GPIO.output(gpioBcmNo, level)
     
     def modeInput(self):
