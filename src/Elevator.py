@@ -7,9 +7,9 @@ class Elevator:
         self._gpioDirection = 20
         self._drv8825 = DRV8825.DRV8825(globalGPIO, self._gpioStep, self._gpioDirection)
     
-    def moveUp(steps):
+    def moveUp(self, steps):
         self._drv8825.move(steps, self._drv8825.clockWise())
     
-    def moveDown(steps):
+    def moveDown(self, steps):
         self._drv8825.move(steps, self._drv8825.counterClockWise())
 
