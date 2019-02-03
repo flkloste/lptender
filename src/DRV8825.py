@@ -10,7 +10,7 @@ class DRV8825:
                 
         # setup step GPIO
         self._gpio.setup(self._gpioStep, self._gpio.modeOutput())
-        self._gpio.setup(self._gpioStep, self._gpio.levelLow())
+        self._gpio.output(self._gpioStep, self._gpio.levelLow())
         
         # setup direction GPIO
         self._gpio.setup(self._gpioDirection, self._gpio.modeOutput())

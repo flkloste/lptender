@@ -13,6 +13,7 @@ class GlobalGPIO:
         if gpioBcmNo in self.usedGPIOs:
             raise RuntimeError("GPIO %s already in use!" % str(gpioBcmNo))
         GPIO.setup(gpioBcmNo, mode)
+        self.usedGPIOs.append(gpioBcmNo)
     
     def output(self, gpioBcmNo,level):
         if gpioBcmNo not in self.usedGPIOs:
