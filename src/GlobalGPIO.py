@@ -3,36 +3,47 @@ import RPi.GPIO as GPIO
 class GlobalGPIO:
     
     def __init__(self):
-        self.usedGPIOs = list()    
+        self.usedOutputGPIOs = list()
+        self.usedInputGPIOs = list()
         GPIO.setmode(GPIO.BCM)
         
     def __del__(self):
         GPIO.cleanup()
 
-    def setup(self, gpioBcmNo, mode):
-        if mode not in [self.modeInput(), self.modeOutput()]:
-            raise RuntimeError("Paramter 'mode' has an invalid value: %s" % str(mode))
-            
-        if gpioBcmNo in self.usedGPIOs:
+    def setupOutput(self, gpioBcmNo):
+        if gpioBcmNo in self.usedOutputGPIOs or gpioBcmNo in self.usedInputGPIOs:
             raise RuntimeError("GPIO %s already in use!" % str(gpioBcmNo))
             
-        GPIO.setup(gpioBcmNo, mode)
-        self.usedGPIOs.append(gpioBcmNo)
+        GPIO.setup(gpioBcmNo, GPIO.OUT)
+        self.usedOutputGPIOs.append(gpioBcmNo)
+    
+    def setupInput(self, gpioBcmNo, pullUpDown=None):
+        if gpioBcmNo in self.usedOutputGPIOs or gpioBcmNo in self.usedInputGPIOs:
+            raise RuntimeError("GPIO %s already in use!" % str(gpioBcmNo))
+            
+        if pullUpDown not in [None, self.inputPullUp(), self.inputPullDown()]:
+            raise RuntimeError("Invalid value for pull up/down: %s" % str(pullUpDown))
+            
+        if pullUpDown is None:
+            GPIO.setup(gpioBcmNo, GPIO.IN)
+        else:
+            GPIO.setup(gpioBcmNo, GPIO.IN, pull_up_down=pullUpDown)
+        self.usedInputGPIOs.append(gpioBcmNo)
     
     def output(self, gpioBcmNo, level):
         if level not in [self.levelHigh(), self.levelLow()]:
-            raise RuntimeError("Paramter 'level' has an invalid value: %s" % str(level))
+            raise RuntimeError("Parameter 'level' has an invalid value: %s" % str(level))
             
-        if gpioBcmNo not in self.usedGPIOs:
-            raise RuntimeError("GPI %s has not been set up!" % str(gpioBcmNo))
+        if gpioBcmNo not in self.usedOutputGPIOs:
+            raise RuntimeError("GPI %s has not been set up as an output!" % str(gpioBcmNo))
             
-        GPIO.output(gpioBcmNo, level)
+        GPIO.output(gpioBcmNo, level) 
     
-    def modeInput(self):
-        return GPIO.IN
-        
-    def modeOutput(self):
-        return GPIO.OUT
+    def input(self, gpioBcmNo):
+        if gpioBcmNo not in self.usedInputGPIOs:
+            raise RuntimeError("GPI %s has not been set up as an input!" % str(gpioBcmNo))
+            
+        return GPIO.input(gpioBcmNo)
 
     def levelHigh(self):
         return GPIO.HIGH
@@ -40,4 +51,8 @@ class GlobalGPIO:
     def levelLow(self):
         return GPIO.LOW
 
-
+    def inputPullDown(self):
+        return GPIO.PUD_DOWN
+        
+    def inputPullUp(self):
+        return GPIO.PUD_UP
