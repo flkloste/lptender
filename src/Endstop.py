@@ -8,4 +8,4 @@ class Endstop:
         self._gpio.setupInput(self._gpioSignal, self._gpio.inputPullDown())
         
     def isClosed(self):
-        return self._gpio.input(self._gpioSignal)
+        return bool(self._gpio.input(self._gpioSignal))

@@ -35,13 +35,13 @@ class GlobalGPIO:
             raise RuntimeError("Parameter 'level' has an invalid value: %s" % str(level))
             
         if gpioBcmNo not in self.usedOutputGPIOs:
-            raise RuntimeError("GPI %s has not been set up as an output!" % str(gpioBcmNo))
+            raise RuntimeError("GPIO %s has not been set up as an output!" % str(gpioBcmNo))
             
         GPIO.output(gpioBcmNo, level) 
     
     def input(self, gpioBcmNo):
         if gpioBcmNo not in self.usedInputGPIOs:
-            raise RuntimeError("GPI %s has not been set up as an input!" % str(gpioBcmNo))
+            raise RuntimeError("GPIO %s has not been set up as an input!" % str(gpioBcmNo))
             
         return GPIO.input(gpioBcmNo)
 

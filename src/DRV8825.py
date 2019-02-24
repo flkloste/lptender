@@ -22,8 +22,8 @@ class DRV8825:
         return self.MIN_DELAY + 1/(1+math.exp(float(step)/20-5)) * self.MAX_DELAY
     
     def move(self, steps, direction):
-        if steps < 0:
-            raise RuntimeError("Steps must not be negative. (steps=%s)" % str(steps))
+        if steps not in range(1000):
+            raise RuntimeError("Steps out of range. (steps=%s)" % str(steps))
         
         if direction not in [self.clockWise(), self.counterClockWise()]:
             raise RuntimeError("Direction has an invalid value: %s" % str(direction))
@@ -36,6 +36,26 @@ class DRV8825:
             sleep(delay)
             self._gpio.output(self._gpioStep, self._gpio.levelLow())
             sleep(delay)
+            
+    def moveSingleStepSlow(self, direction):
+        if direction not in [self.clockWise(), self.counterClockWise()]:
+            raise RuntimeError("Direction has an invalid value: %s" % str(direction))
+            
+        self._gpio.output(self._gpioDirection, direction)
+        self._gpio.output(self._gpioStep, self._gpio.levelHigh())
+        sleep(self.MAX_DELAY)
+        self._gpio.output(self._gpioStep, self._gpio.levelLow())
+        sleep(self.MAX_DELAY)
+        
+    def moveSingleStepFast(self, direction):
+        if direction not in [self.clockWise(), self.counterClockWise()]:
+            raise RuntimeError("Direction has an invalid value: %s" % str(direction))
+            
+        self._gpio.output(self._gpioDirection, direction)
+        self._gpio.output(self._gpioStep, self._gpio.levelHigh())
+        sleep(self.MIN_DELAY)
+        self._gpio.output(self._gpioStep, self._gpio.levelLow())
+        sleep(self.MIN_DELAY)
     
     def clockWise(self):
         return self._gpio.levelHigh()
