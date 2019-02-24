@@ -1,4 +1,5 @@
 from time import sleep
+from math import exp
 
 class DRV8825:
 
@@ -6,7 +7,7 @@ class DRV8825:
         self._gpio = globalGPIO
         self._gpioStep = gpioStep
         self._gpioDirection = gpioDirection
-        self.MIN_DELAY = 0.0004
+        self.MIN_DELAY = 0.0001
         self.MAX_DELAY = 0.02
                 
         # setup step GPIO
@@ -17,12 +18,8 @@ class DRV8825:
         self._gpio.setupOutput(self._gpioDirection)
         self._gpio.output(self._gpioDirection, self.clockWise())
     
-    # create a smooth ramping by applying an inverse sigmoid function to the delay values
-    def CalcDelayRamp(self, step):
-        return self.MIN_DELAY + 1/(1+math.exp(float(step)/20-5)) * self.MAX_DELAY
-    
     def move(self, steps, direction):
-        if steps not in range(1000):
+        if steps not in range(100000):
             raise RuntimeError("Steps out of range. (steps=%s)" % str(steps))
         
         if direction not in [self.clockWise(), self.counterClockWise()]:
@@ -31,7 +28,7 @@ class DRV8825:
         self._gpio.output(self._gpioDirection, direction)
     
         for step in range(steps):
-            delay = self.CalcDelayRamp(step)
+            delay = self.MIN_DELAY
             self._gpio.output(self._gpioStep, self._gpio.levelHigh())
             sleep(delay)
             self._gpio.output(self._gpioStep, self._gpio.levelLow())

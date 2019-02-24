@@ -17,11 +17,11 @@ class Elevator:
     def moveDown(self, steps):
         self._drv8825.move(steps, self._drv8825.counterClockWise())
 
-    def gotoHome(self, steps):
+    def gotoHome(self):
         # move up until endstop is reached
-        while not _endstop.isClosed():
-            self._drv8825.moveSingleStepFast(self._drv8825.self._drv8825.clockWise())
+        while not self._endstop.isClosed():
+            self._drv8825.moveSingleStepFast(self._drv8825.clockWise())
             
         # endstop is reached
-        while _endstop.isClosed():
-            self._drv8825.moveSingleStepSlow(self._drv8825.self._drv8825.counterClockWise())
+        while self._endstop.isClosed():
+            self._drv8825.moveSingleStepSlow(self._drv8825.counterClockWise())

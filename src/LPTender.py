@@ -6,8 +6,9 @@ from time import sleep
 if __name__ == "__main__":
     gpio = GlobalGPIO.GlobalGPIO()
     elevator = Elevator.Elevator(gpio)
-    
-    elevator.moveUp(200)
+
+    elevator.gotoHome()
+    elevator.moveDown(20000)
     sleep(1)
-    elevator.moveDown(200)
+    elevator.moveUp(10000)
     
