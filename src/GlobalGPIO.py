@@ -5,9 +5,12 @@ class GlobalGPIO:
     def __init__(self):
         self.usedOutputGPIOs = list()
         self.usedInputGPIOs = list()
+        self.usedPwms = list()
         GPIO.setmode(GPIO.BCM)
         
     def __del__(self):
+        for p in self.usedPwms:
+            p.stop
         GPIO.cleanup()
 
     def setupOutput(self, gpioBcmNo):
@@ -44,6 +47,14 @@ class GlobalGPIO:
             raise RuntimeError("GPIO %s has not been set up as an input!" % str(gpioBcmNo))
             
         return GPIO.input(gpioBcmNo)
+        
+    def pwm(self, gpioBcmNo, frequency):
+        if gpioBcmNo not in self.usedOutputGPIOs:
+            raise RuntimeError("GPIO %s has not been set up as an output!" % str(gpioBcmNo))
+            
+        p = GPIO.PWM(gpioBcmNo, frequency)
+        self.usedPwms.append(p)
+        return p
 
     def levelHigh(self):
         return GPIO.HIGH
