@@ -10,10 +10,15 @@ if __name__ == "__main__":
     
     servo = Servo.ServoDS3218_180(gpio, 17)
     
-    for i in range (1,100):
-        servo.setAngle(2 + float(i)/100)
-        sleep(0.5)
-    
+    servo.setAngle(65)
+    sleep(1)
+    servo.dontMove()
+
+    sleep(1)
+    servo.setAngle(85)
+    sleep(1)
+    servo.dontMove()
+    sleep(1) 
     #elevator.gotoHome()
     #elevator.moveDown(20000)
     
