@@ -1,4 +1,4 @@
- class Servo:
+class Servo:
     
     def __init__(self, globalGPIO, gpioControl):
         self._gpio = globalGPIO
@@ -11,7 +11,11 @@
         self._pwm.start(0)
         
     def setAngle(self, angle):
-        dutyCycle = ((angle/180.0) + 1.0) * 5.0
+        if not (0 <= angle <= 270): 
+            raise RuntimeError("Angle out of range. (angle=%s)" % str(angle))
+ 
+        dutyCycle = 2.22222222 + 10.0 / 270.0 * angle
+        print dutyCycle
         self._pwm.ChangeDutyCycle(dutyCycle)
         
     def dontMove(self):
