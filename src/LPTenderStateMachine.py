@@ -1,6 +1,4 @@
 import threading
-import LpTenderDummy
-from time import sleep
 
 class Transitions(object):
     PressPlay = 'PressPlay'
