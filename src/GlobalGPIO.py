@@ -1,4 +1,5 @@
 import RPi.GPIO as GPIO
+from time import sleep
 
 class GlobalGPIO:
     
@@ -12,6 +13,7 @@ class GlobalGPIO:
         for p in self.usedPwms:
             p.stop
         GPIO.cleanup()
+        sleep(2)
 
     def setupOutput(self, gpioBcmNo):
         if gpioBcmNo in self.usedOutputGPIOs or gpioBcmNo in self.usedInputGPIOs:
