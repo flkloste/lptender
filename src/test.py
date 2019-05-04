@@ -9,8 +9,8 @@ if __name__ == "__main__":
     elevator = Elevator.Elevator(gpio)
     servo_rotate = Servo.ServoDS3218_270(gpio, 17)
     gripper = Gripper.Gripper(gpio)
-    ROTATE_0 = 184
-    ROTATE_180 = 9
+    ROTATE_0 = 186
+    ROTATE_180 = 10
     HOME_TO_BASE = 31600
     FLIPPED_DELTA = 3800
     

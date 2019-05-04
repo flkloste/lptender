@@ -27,3 +27,5 @@ class Elevator:
         # endstop is reached
         while self._endstop.isClosed():
             self._drv8825.moveSingleStepSlow(self._drv8825.counterClockWise())
+
+        sleep(1)
