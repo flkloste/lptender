@@ -13,9 +13,11 @@ class GlobalGPIO:
         # stop all pwm output (servo)
         for p in self.usedPwms:
             #p.stop
-            self._pi.set_servo_pulsewidth(pi, 0)  
+            #self._pi.set_servo_pulsewidth(p, 0)  
+            pass
+        
         self._pi.stop()
-        sleep(2)
+        sleep(1)
 
     def setupOutput(self, gpioBcmNo):
         if gpioBcmNo in self.usedOutputGPIOs or gpioBcmNo in self.usedInputGPIOs:

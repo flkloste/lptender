@@ -7,7 +7,7 @@ class DRV8825:
         self._gpio = globalGPIO
         self._gpioStep = gpioStep
         self._gpioDirection = gpioDirection
-        self.MIN_DELAY = 0.0001
+        self.MIN_DELAY = 0.000001
         self.MAX_DELAY = 0.02
                 
         # setup step GPIO

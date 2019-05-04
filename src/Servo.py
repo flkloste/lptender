@@ -27,7 +27,7 @@ class ServoDS3218_270(Servo):
  
         #dutyCycle = 2.22222222 + 10.0 / 270.0 * angle
         #self._pwm.ChangeDutyCycle(dutyCycle)
-        pulseWidth = 500 + 2000.0 / 270.0 * angle
+        pulseWidth = int(500 + 2000.0 / 270.0 * angle)
         self._gpio.setServoPulseWidth(self._gpioControl, pulseWidth)
         
 class ServoDS3218_180(Servo):
@@ -40,5 +40,5 @@ class ServoDS3218_180(Servo):
  
         #dutyCycle = 2 + 10.0 / 180.0 * angle
         #self._pwm.ChangeDutyCycle(dutyCycle)
-        pulseWidth = 500 + 2000.0 / 180.0 * angle
+        pulseWidth = int(500 + 2000.0 / 180.0 * angle)
         self._gpio.setServoPulseWidth(self._gpioControl, pulseWidth)
