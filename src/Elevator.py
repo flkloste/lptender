@@ -16,7 +16,9 @@ class Elevator:
         sleep(1)
     
     def moveDown(self, steps):
-        self._drv8825.move(steps, self._drv8825.counterClockWise())
+#        self._drv8825.move(steps, self._drv8825.counterClockWise())
+        for i in range(steps):
+           self._drv8825.moveSingleStepFast(self._drv8825.counterClockWise())
         sleep(1)
 
     def gotoHome(self):
