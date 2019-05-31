@@ -11,7 +11,7 @@ if __name__ == "__main__":
     gripper = Gripper.Gripper(gpio)
     ROTATE_0 = 179
     ROTATE_180 = 2
-    HOME_TO_BASE = 31200
+    HOME_TO_BASE = 34000
     FLIPPED_DELTA = 4600
     
     gripper.release()
