@@ -1,86 +1,74 @@
 import pigpio
-from time import sleep
+
+class GpioType:
+    INPUT = 0
+    OUTPUT = 1
+    PWM = 2
 
 class GlobalGPIO:
     
     class _Impl:
         def __init__(self):
-            self.usedOutputGPIOs = list()
-            self.usedInputGPIOs = list()
-            self.usedPwms = list()
+            self.usedGPIOs = list()
             self.contextCount = 0
 
         def __enter__(self):
-            print "enter gpio "
             if self.contextCount == 0:
-                print "start pigpio"
                 self._pi = pigpio.pi()
             self.contextCount += 1
+            return self
             
         def __exit__(self, exc_type, exc_value, exc_traceback):
-            print "exit gpio"
             self.contextCount -= 1
             
             if self.contextCount == 0:
-                print "stop pigpio"
                 # stop all pwm output (servo)
-                for p in self.usedPwms:
-                    p.stop
-                    self._pi.set_servo_pulsewidth(p, 0)
+                for pwmGpio in [gpio for (gpio, type) in self.usedGPIOs if type == GpioType.PWM]:
+                    self._pi.set_servo_pulsewidth(pwmGpio, 0)
                 
+                del self.usedGPIOs[:]
+
                 self._pi.stop()
 
         def setupOutput(self, gpioBcmNo):
-            if gpioBcmNo in self.usedOutputGPIOs or gpioBcmNo in self.usedInputGPIOs:
+            if gpioBcmNo in [gpio for (gpio, type) in self.usedGPIOs]:
                 raise RuntimeError("GPIO %s already in use!" % str(gpioBcmNo))
                 
-            #GPIO.setup(gpioBcmNo, GPIO.OUT)
             self._pi.set_mode(gpioBcmNo, pigpio.OUTPUT)
-            self.usedOutputGPIOs.append(gpioBcmNo)
+            self.usedGPIOs.append((gpioBcmNo, GpioType.OUTPUT))
         
         def setupInput(self, gpioBcmNo, pullUpDown=None):
-            if gpioBcmNo in self.usedOutputGPIOs or gpioBcmNo in self.usedInputGPIOs:
+            if gpioBcmNo in [gpio for (gpio, type) in self.usedGPIOs]:
                 raise RuntimeError("GPIO %s already in use!" % str(gpioBcmNo))
                 
             if pullUpDown not in [None, self.inputPullUp(), self.inputPullDown()]:
                 raise RuntimeError("Invalid value for pull up/down: %s" % str(pullUpDown))
                 
             if pullUpDown is None:
-                #GPIO.setup(gpioBcmNo, GPIO.IN)
                 self._pi.set_mode(gpioBcmNo, pigpio.INPUT)
             else:
-                #GPIO.setup(gpioBcmNo, GPIO.IN, pull_up_down=pullUpDown)
                 self._pi.set_mode(gpioBcmNo, pigpio.INPUT)
                 self._pi.set_pull_up_down(gpioBcmNo, pullUpDown)
-            self.usedInputGPIOs.append(gpioBcmNo)
+                
+            self.usedGPIOs.append((gpioBcmNo, GpioType.INPUT))
         
         def output(self, gpioBcmNo, level):
+            if gpioBcmNo not in [gpio for (gpio, type) in self.usedGPIOs if type == GpioType.OUTPUT]:
+                raise RuntimeError("GPIO %s has not been set up as an output!" % str(gpioBcmNo))
+
             if level not in [self.levelHigh(), self.levelLow()]:
                 raise RuntimeError("Parameter 'level' has an invalid value: %s" % str(level))
                 
-            if gpioBcmNo not in self.usedOutputGPIOs:
-                raise RuntimeError("GPIO %s has not been set up as an output!" % str(gpioBcmNo))
-                
-            #GPIO.output(gpioBcmNo, level) 
             self._pi.write(gpioBcmNo, level)
         
         def input(self, gpioBcmNo):
-            if gpioBcmNo not in self.usedInputGPIOs:
+            if gpioBcmNo not in [gpio for (gpio, type) in self.usedGPIOs if type == GpioType.INPUT]:
                 raise RuntimeError("GPIO %s has not been set up as an input!" % str(gpioBcmNo))
                 
-            #return GPIO.input(gpioBcmNo)
             return self._pi.read(gpioBcmNo)
-            
-    #    def pwm(self, gpioBcmNo, frequency):
-    #        if gpioBcmNo not in self.usedOutputGPIOs:
-    #            raise RuntimeError("GPIO %s has not been set up as an #output!" % str(gpioBcmNo))
-    #            
-    #        p = GPIO.PWM(gpioBcmNo, frequency)
-    #        self.usedPwms.append(p)
-    #        return p
 
         def setServoPulseWidth(self, gpioBcmNo, pulseWidth):
-            if gpioBcmNo in self.usedOutputGPIOs or gpioBcmNo in self.usedInputGPIOs:
+            if gpioBcmNo in [gpio for (gpio, type) in self.usedGPIOs if (type in [GpioType.INPUT, GpioType.OUTPUT])]:
                 raise RuntimeError("GPIO %s already in use!" % str(gpioBcmNo))
                 
             if pulseWidth not in range(500, 2500) and pulseWidth != 0:
@@ -88,23 +76,19 @@ class GlobalGPIO:
 
             self._pi.set_servo_pulsewidth(gpioBcmNo, pulseWidth)
             
-            if gpioBcmNo not in self.usedPwms:
-                self.usedPwms.append(gpioBcmNo)
+            if gpioBcmNo not in [gpio for (gpio, type) in self.usedGPIOs]:
+                self.usedGPIOs.append((gpioBcmNo, GpioType.PWM))
 
         def levelHigh(self):
-            #return GPIO.HIGH
             return 1
 
         def levelLow(self):
-            #return GPIO.LOW
             return 0
 
         def inputPullDown(self):
-            #return GPIO.PUD_DOWN
             return pigpio.PUD_DOWN
             
         def inputPullUp(self):
-            #return GPIO.PUD_UP
             return pigpio.PUD_UP
 
      # storage for the instance reference
