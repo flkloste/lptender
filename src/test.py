@@ -5,7 +5,10 @@ import Gripper
 from time import sleep
 
 if __name__ == "__main__":
-    gpio = GlobalGPIO.GlobalGPIO()
+    with GlobalGPIO.GlobalGPIO() as gpio:
+        pass
+   
+   '''
     elevator = Elevator.Elevator(gpio)
     servo_rotate = Servo.ServoDS3218_270(gpio, 17)
     gripper = Gripper.Gripper(gpio)
@@ -29,3 +32,4 @@ if __name__ == "__main__":
     gripper.release()
     sleep(3)
 
+'''
