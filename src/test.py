@@ -8,7 +8,7 @@ if __name__ == "__main__":
     with GlobalGPIO.GlobalGPIO() as gpio:
         pass
    
-   '''
+'''
     elevator = Elevator.Elevator(gpio)
     servo_rotate = Servo.ServoDS3218_270(gpio, 17)
     gripper = Gripper.Gripper(gpio)

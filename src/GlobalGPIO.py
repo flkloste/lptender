@@ -8,17 +8,27 @@ class GlobalGPIO:
             self.usedOutputGPIOs = list()
             self.usedInputGPIOs = list()
             self.usedPwms = list()
+            self.contextCount = 0
 
         def __enter__(self):
-            self._pi = pigpio.pi()
+            print "enter gpio "
+            if self.contextCount == 0:
+                print "start pigpio"
+                self._pi = pigpio.pi()
+            self.contextCount += 1
             
-        def __exit__(self):
-            # stop all pwm output (servo)
-            for p in self.usedPwms:
-                p.stop
-                self._pi.set_servo_pulsewidth(p, 0)
+        def __exit__(self, exc_type, exc_value, exc_traceback):
+            print "exit gpio"
+            self.contextCount -= 1
             
-            self._pi.stop()
+            if self.contextCount == 0:
+                print "stop pigpio"
+                # stop all pwm output (servo)
+                for p in self.usedPwms:
+                    p.stop
+                    self._pi.set_servo_pulsewidth(p, 0)
+                
+                self._pi.stop()
 
         def setupOutput(self, gpioBcmNo):
             if gpioBcmNo in self.usedOutputGPIOs or gpioBcmNo in self.usedInputGPIOs:
