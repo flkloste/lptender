@@ -1,5 +1,12 @@
 import pigpio
 
+def checkContext(func):
+    def decorator(self, *args, **kwargs):
+        if self.contextCount == 0:  
+             raise RuntimeError("Called out of context!")
+        func(self, *args, **kwargs)
+    return decorator
+
 class GpioType:
     INPUT = 0
     OUTPUT = 1
@@ -30,6 +37,7 @@ class GlobalGPIO:
 
                 self._pi.stop()
 
+        @checkContext
         def setupOutput(self, gpioBcmNo):
             if gpioBcmNo in [gpio for (gpio, type) in self.usedGPIOs]:
                 raise RuntimeError("GPIO %s already in use!" % str(gpioBcmNo))
@@ -37,6 +45,7 @@ class GlobalGPIO:
             self._pi.set_mode(gpioBcmNo, pigpio.OUTPUT)
             self.usedGPIOs.append((gpioBcmNo, GpioType.OUTPUT))
         
+        @checkContext
         def setupInput(self, gpioBcmNo, pullUpDown=None):
             if gpioBcmNo in [gpio for (gpio, type) in self.usedGPIOs]:
                 raise RuntimeError("GPIO %s already in use!" % str(gpioBcmNo))
@@ -52,6 +61,7 @@ class GlobalGPIO:
                 
             self.usedGPIOs.append((gpioBcmNo, GpioType.INPUT))
         
+        @checkContext
         def output(self, gpioBcmNo, level):
             if gpioBcmNo not in [gpio for (gpio, type) in self.usedGPIOs if type == GpioType.OUTPUT]:
                 raise RuntimeError("GPIO %s has not been set up as an output!" % str(gpioBcmNo))
@@ -61,12 +71,14 @@ class GlobalGPIO:
                 
             self._pi.write(gpioBcmNo, level)
         
+        @checkContext
         def input(self, gpioBcmNo):
             if gpioBcmNo not in [gpio for (gpio, type) in self.usedGPIOs if type == GpioType.INPUT]:
                 raise RuntimeError("GPIO %s has not been set up as an input!" % str(gpioBcmNo))
                 
             return self._pi.read(gpioBcmNo)
 
+        @checkContext
         def setServoPulseWidth(self, gpioBcmNo, pulseWidth):
             if gpioBcmNo in [gpio for (gpio, type) in self.usedGPIOs if (type in [GpioType.INPUT, GpioType.OUTPUT])]:
                 raise RuntimeError("GPIO %s already in use!" % str(gpioBcmNo))
