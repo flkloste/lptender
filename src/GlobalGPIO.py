@@ -2,7 +2,7 @@ import pigpio
 
 def checkContext(func):
     def decorator(self, *args, **kwargs):
-        if self.contextCount == 0:  
+        if self._contextCount == 0:  
              raise RuntimeError("Called out of context!")
         func(self, *args, **kwargs)
     return decorator
@@ -16,38 +16,38 @@ class GlobalGPIO:
     
     class _Impl:
         def __init__(self):
-            self.usedGPIOs = list()
-            self.contextCount = 0
+            self._usedGPIOs = list()
+            self._contextCount = 0
 
         def __enter__(self):
-            if self.contextCount == 0:
+            if self._contextCount == 0:
                 self._pi = pigpio.pi()
-            self.contextCount += 1
+            self._contextCount += 1
             return self
             
         def __exit__(self, exc_type, exc_value, exc_traceback):
-            self.contextCount -= 1
+            self._contextCount -= 1
             
-            if self.contextCount == 0:
+            if self._contextCount == 0:
                 # stop all pwm output (servo)
-                for pwmGpio in [gpio for (gpio, type) in self.usedGPIOs if type == GpioType.PWM]:
+                for pwmGpio in [gpio for (gpio, type) in self._usedGPIOs if type == GpioType.PWM]:
                     self._pi.set_servo_pulsewidth(pwmGpio, 0)
                 
-                del self.usedGPIOs[:]
+                del self._usedGPIOs[:]
 
                 self._pi.stop()
 
         @checkContext
         def setupOutput(self, gpioBcmNo):
-            if gpioBcmNo in [gpio for (gpio, type) in self.usedGPIOs]:
+            if gpioBcmNo in [gpio for (gpio, type) in self._usedGPIOs]:
                 raise RuntimeError("GPIO %s already in use!" % str(gpioBcmNo))
                 
             self._pi.set_mode(gpioBcmNo, pigpio.OUTPUT)
-            self.usedGPIOs.append((gpioBcmNo, GpioType.OUTPUT))
+            self._usedGPIOs.append((gpioBcmNo, GpioType.OUTPUT))
         
         @checkContext
         def setupInput(self, gpioBcmNo, pullUpDown=None):
-            if gpioBcmNo in [gpio for (gpio, type) in self.usedGPIOs]:
+            if gpioBcmNo in [gpio for (gpio, type) in self._usedGPIOs]:
                 raise RuntimeError("GPIO %s already in use!" % str(gpioBcmNo))
                 
             if pullUpDown not in [None, self.inputPullUp(), self.inputPullDown()]:
@@ -59,11 +59,11 @@ class GlobalGPIO:
                 self._pi.set_mode(gpioBcmNo, pigpio.INPUT)
                 self._pi.set_pull_up_down(gpioBcmNo, pullUpDown)
                 
-            self.usedGPIOs.append((gpioBcmNo, GpioType.INPUT))
+            self._usedGPIOs.append((gpioBcmNo, GpioType.INPUT))
         
         @checkContext
         def output(self, gpioBcmNo, level):
-            if gpioBcmNo not in [gpio for (gpio, type) in self.usedGPIOs if type == GpioType.OUTPUT]:
+            if gpioBcmNo not in [gpio for (gpio, type) in self._usedGPIOs if type == GpioType.OUTPUT]:
                 raise RuntimeError("GPIO %s has not been set up as an output!" % str(gpioBcmNo))
 
             if level not in [self.levelHigh(), self.levelLow()]:
@@ -73,14 +73,14 @@ class GlobalGPIO:
         
         @checkContext
         def input(self, gpioBcmNo):
-            if gpioBcmNo not in [gpio for (gpio, type) in self.usedGPIOs if type == GpioType.INPUT]:
+            if gpioBcmNo not in [gpio for (gpio, type) in self._usedGPIOs if type == GpioType.INPUT]:
                 raise RuntimeError("GPIO %s has not been set up as an input!" % str(gpioBcmNo))
                 
             return self._pi.read(gpioBcmNo)
 
         @checkContext
         def setServoPulseWidth(self, gpioBcmNo, pulseWidth):
-            if gpioBcmNo in [gpio for (gpio, type) in self.usedGPIOs if (type in [GpioType.INPUT, GpioType.OUTPUT])]:
+            if gpioBcmNo in [gpio for (gpio, type) in self._usedGPIOs if (type in [GpioType.INPUT, GpioType.OUTPUT])]:
                 raise RuntimeError("GPIO %s already in use!" % str(gpioBcmNo))
                 
             if pulseWidth not in range(500, 2500) and pulseWidth != 0:
@@ -88,8 +88,8 @@ class GlobalGPIO:
 
             self._pi.set_servo_pulsewidth(gpioBcmNo, pulseWidth)
             
-            if gpioBcmNo not in [gpio for (gpio, type) in self.usedGPIOs]:
-                self.usedGPIOs.append((gpioBcmNo, GpioType.PWM))
+            if gpioBcmNo not in [gpio for (gpio, type) in self._usedGPIOs]:
+                self._usedGPIOs.append((gpioBcmNo, GpioType.PWM))
 
         def levelHigh(self):
             return 1
