@@ -12,14 +12,12 @@ class Transitions(object):
     FlipWithAutoplay = 'FlipWithAutoplay'
     PlayAfterFlip = 'PlayAfterFlip'
 
-class State(object):
-    
-    numberOfTransitionsDone = 0
+class _StateBase(object):
     
     def __init__(self, stateMachine):
         self._stateMachine = stateMachine
+        self._stateMachine._transitionCount += 1
         print 'Processing current state:', str(self)
-        State.numberOfTransitionsDone += 1
         
     def doTransition(self, transition):
         raise NotImplementedError()
@@ -27,114 +25,126 @@ class State(object):
     def ignoreTransition(self, transition):
         print 'Ignoring transition "%s" (state=%s)' % (transition, self)
         return self
-    
-    def execFctAndDoTransitionAfterwards(self, fct, args=None, transition=None):
-        # store number of transitions so that passed transition will be ignored if another transition was invoked before
-        currentNumberOfTransitions = State.numberOfTransitionsDone
-        
-        if args == None:
-            fct()
-        else:
-            fct(args)
-        if transition != None and currentNumberOfTransitions == State.numberOfTransitionsDone:
-            self._stateMachine.doTransition(transition)
-    
+
     def __repr__(self):
         return self.__str__()
     
     def __str__(self):
         return self.__class__.__name__
 
-class Playing(State):
+class _StatePlaying(_StateBase):
     
     def __init__(self, stateMachine):
-        super(Playing, self).__init__(stateMachine)
-        threading.Thread(target=self.execFctAndDoTransitionAfterwards, args=(self._stateMachine._lptender.waitForEndOfRecord, None, Transitions.EndOfRecord)).start()
+        super(_StatePlaying, self).__init__(stateMachine)
+        threading.Thread(target=self._stateMachine._execFctAndDoTransitionAfterwards, args=(self._stateMachine._lptender.waitForEndOfRecord, None, Transitions.EndOfRecord, self._stateMachine._transitionCount)).start()
         
     def doTransition(self, transition):
         if transition == Transitions.Stop:
-            return Stopping(self._stateMachine)
+            return _StateStopping(self._stateMachine)
         elif transition == Transitions.EndOfRecord:
-            return Stopped(self._stateMachine)
+            return _StateStopped(self._stateMachine)
         else:
             return self.ignoreTransition(transition)
     
-class Stopping(State):
+class _StateStopping(_StateBase):
     
     def __init__(self, stateMachine):
-        super(Stopping, self).__init__(stateMachine)
-        threading.Thread(target=self.execFctAndDoTransitionAfterwards, args=(self._stateMachine._lptender.waitForStopDone, None, Transitions.StopDone)).start()
+        super(_StateStopping, self).__init__(stateMachine)
+        threading.Thread(target=self._stateMachine._execFctAndDoTransitionAfterwards, args=(self._stateMachine._lptender.waitForStopDone, None, Transitions.StopDone, self._stateMachine._transitionCount)).start()
         
     def doTransition(self, transition):
         if transition == Transitions.StopDone:
-            return Stopped(self._stateMachine)
+            return _StateStopped(self._stateMachine)
         else:
             return self.ignoreTransition(transition)
     
-class Stopped(State):
+class _StateStopped(_StateBase):
     
     def __init__(self, stateMachine):
-        super(Stopped, self).__init__(stateMachine)
+        super(_StateStopped, self).__init__(stateMachine)
         
     def doTransition(self, transition):
         if transition == Transitions.PressPlay:
-            return PlayPressed(self._stateMachine)
+            return _StatePlayPressed(self._stateMachine)
         elif transition == Transitions.FlipOnly:
-            return FlippingOnly(self._stateMachine)
+            return _StateFlippingOnly(self._stateMachine)
         elif transition == Transitions.FlipWithAutoplay:
-            return FlippingWithAutoplay(self._stateMachine)
+            return _StateFlippingWithAutoplay(self._stateMachine)
         else:
             return self.ignoreTransition(transition)
         
-class PlayPressed(State):
+class _StatePlayPressed(_StateBase):
     
     def __init__(self, stateMachine):
-        super(PlayPressed, self).__init__(stateMachine)
-        threading.Thread(target=self.execFctAndDoTransitionAfterwards, args=(self._stateMachine._lptender.pressPlay, None, Transitions.PlayingReady)).start()
+        super(_StatePlayPressed, self).__init__(stateMachine)
+        threading.Thread(target=self._stateMachine._execFctAndDoTransitionAfterwards, args=(self._stateMachine._lptender.pressPlay, None, Transitions.PlayingReady, self._stateMachine._transitionCount)).start()
         
     def doTransition(self, transition):
         if transition == Transitions.PlayingReady:
-            return Playing(self._stateMachine)
+            return _StatePlaying(self._stateMachine)
         else:
             return self.ignoreTransition(transition)
         
-class FlippingWithAutoplay(State):
+class _StateFlippingWithAutoplay(_StateBase):
     
     def __init__(self, stateMachine):
-        super(FlippingWithAutoplay, self).__init__(stateMachine)
-        threading.Thread(target=self.execFctAndDoTransitionAfterwards, args=(self._stateMachine._lptender.flip, None, Transitions.PlayAfterFlip)).start()
+        super(_StateFlippingWithAutoplay, self).__init__(stateMachine)
+        threading.Thread(target=self._stateMachine._execFctAndDoTransitionAfterwards, args=(self._stateMachine._lptender.flip, None, Transitions.PlayAfterFlip, self._stateMachine._transitionCount)).start()
         
     def doTransition(self, transition):
         if transition == Transitions.PlayAfterFlip:
-            return PlayPressed(self._stateMachine)
+            return _StatePlayPressed(self._stateMachine)
         else:
             return self.ignoreTransition(transition)
     
-class FlippingOnly(State):
+class _StateFlippingOnly(_StateBase):
     
     def __init__(self, stateMachine):
-        super(FlippingOnly, self).__init__(stateMachine)
-        threading.Thread(target=self.execFctAndDoTransitionAfterwards, args=(self._stateMachine._lptender.flip, None, Transitions.FlipDone)).start()
+        super(_StateFlippingOnly, self).__init__(stateMachine)
+        threading.Thread(target=self._stateMachine._execFctAndDoTransitionAfterwards, args=(self._stateMachine._lptender.flip, None, Transitions.FlipDone, self._stateMachine._transitionCount)).start()
         
     def doTransition(self, transition):
         if transition == Transitions.FlipDone:
-            return Stopped(self._stateMachine)
+            return _StateStopped(self._stateMachine)
         else:
             return self.ignoreTransition(transition)
         
 class LpTenderStateMachine(object):
     
-    def __init__(self):
+    def __init__(self, lpTender):
         self._lock = threading.Lock()
-        self._lptender = LpTenderDummy.LpTenderDummy()
-        # set start state
-        self._state = Stopped(self)
+        self._lptender = lpTender
+        self._transitionCount = 0
+        self._state = _StateStopped(self)
+        self._autoFlip = False
         
-    def doTransition(self, transition):
+    def doTransition(self, transition, numberOfTransititionsForCompare=None):
         with self._lock:
-            self._state = self._state.doTransition(transition)
+            if numberOfTransititionsForCompare == None or numberOfTransititionsForCompare == self._transitionCount:
+                self._state = self._state.doTransition(transition)
+            else:
+                print "Transition outdated: " + transition
             
     def getCurrentState(self):
         with self._lock:
             return self._state
+
+    @property
+    def autoFlip(self):
+        with self._lock:
+            return self._autoFlip
+
+    @autoFlip.setter
+    def autoFlip(self, value):
+        with self._lock:
+            self._autoFlip = bool(value)
+
+    def _execFctAndDoTransitionAfterwards(self, fct, args=None, transition=None, transitionCountBeforeFunc=0):        
+        if args == None:
+            fct()
+        else:
+            fct(args)
+
+        if transition != None:
+            self.doTransition(transition, transitionCountBeforeFunc)
 
