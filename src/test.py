@@ -4,6 +4,7 @@ import GlobalGPIO
 import Gripper
 from time import sleep
 import LPTenderMock
+from LPTenderStateMachine import States
 from LPTenderStateMachine import LpTenderStateMachine
 from LPTenderStateMachine import Transitions
 
@@ -16,16 +17,25 @@ if __name__ == "__main__":
     
     lptender = LPTenderMock.LpTenderMock()
     lpTenderFSM = LpTenderStateMachine(lptender)
-
+    lpTenderFSM.autoFlip = True
+    print lpTenderFSM.autoFlip
     print lpTenderFSM.getCurrentState()
-    lpTenderFSM.doTransition(Transitions.FlipWithAutoplay)
+
+
+    while lpTenderFSM.getCurrentState() == States.Initializing:
+        print "wait until ready"
+        sleep(0.5)
+    #lpTenderFSM._doTransition(Transitions.Flip)
     sleep(4)
-    lpTenderFSM.doTransition(Transitions.Stop)
+    #lpTenderFSM._doTransition(Transitions.PressStop)
     sleep(2)
-    lpTenderFSM.doTransition(Transitions.Stop)
+    lpTenderFSM.play()
+
+    lpTenderFSM.stop()
 
     sleep(4)
 
+    #lpTenderFSM.stop()
 
 """
     with GlobalGPIO.GlobalGPIO() as gpio:
