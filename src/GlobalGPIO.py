@@ -91,6 +91,21 @@ class GlobalGPIO:
             if gpioBcmNo not in [gpio for (gpio, type) in self._usedGPIOs]:
                 self._usedGPIOs.append((gpioBcmNo, GpioType.PWM))
 
+        @checkContext
+        def setPwm(self, gpioBcmNo, dutycycle, frequency):
+            if gpioBcmNo not in [gpio for (gpio, type) in self._usedGPIOs if type == GpioType.OUTPUT]:
+                raise RuntimeError("GPIO %s has not been set up as an output!" % str(gpioBcmNo))
+
+            self._pi.set_PWM_dutycycle(gpioBcmNo, dutycycle) 
+            self._pi.set_PWM_frequency(gpioBcmNo, frequency)
+
+        @checkContext
+        def stopPwm(self, gpioBcmNo):
+            if gpioBcmNo not in [gpio for (gpio, type) in self._usedGPIOs if type == GpioType.OUTPUT]:
+                raise RuntimeError("GPIO %s has not been set up as an output!" % str(gpioBcmNo))
+
+            self._pi.set_PWM_dutycycle(gpioBcmNo, 0)
+
         def levelHigh(self):
             return 1
 
@@ -102,6 +117,36 @@ class GlobalGPIO:
             
         def inputPullUp(self):
             return pigpio.PUD_UP
+
+        @checkContext
+        def generate_ramp(self, ramp, step_gpio):
+            """Generate ramp wave forms.
+            https://www.rototron.info/raspberry-pi-stepper-motor-tutorial/
+            ramp:  List of [Frequency, Steps]
+            """
+            self._pi.wave_clear()     # clear existing waves
+            length = len(ramp)  # number of ramp levels
+            wid = [-1] * length
+
+            # Generate a wave per ramp level
+            for i in range(length):
+                frequency = ramp[i][0]
+                micros = int(500000 / frequency)
+                wf = []
+                wf.append(pigpio.pulse(1 << step_gpio, 0, micros))  # pulse on
+                wf.append(pigpio.pulse(0, 1 << step_gpio, micros))  # pulse off
+                self._pi.wave_add_generic(wf)
+                wid[i] = self._pi.wave_create()
+
+            # Generate a chain of waves
+            chain = []
+            for i in range(length):
+                steps = ramp[i][1]
+                x = steps & 255
+                y = steps >> 8
+                chain += [255, 0, wid[i], 255, 1, x, y]
+
+            self._pi.wave_chain(chain)  # Transmit chain.
 
      # storage for the instance reference
     __instance = None  

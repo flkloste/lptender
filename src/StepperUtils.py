@@ -1,3 +1,5 @@
+import math
+
 def verifyRamp(func):
     def decorator(steps):
         result = func(steps)
@@ -13,6 +15,16 @@ def verifyRamp(func):
             raise RuntimeError("Failed to calculate ramp!")
         return result
     return decorator
+
+def calcSecsUntilRampFinished(ramp):
+    secs = 0
+
+    # elem = [frequency [1/s], steps]
+    for elem in ramp:
+        secs += (1.0 / float(elem[0])) * elem[1]
+
+    return math.ceil(secs)
+
     
 @verifyRamp
 def calcRamp(steps):
@@ -20,10 +32,14 @@ def calcRamp(steps):
     if steps < 1:
         raise RuntimeError("Number of steps must be greater than 0")
 
-    frequencyRampUp = [320, 400, 500, 800, 1000, 1600, 2000, 4000, 8000]
+    #frequencyRampUp = [320, 400, 500, 800, 1000, 1600, 2000, 4000, 8000]
+
+    # start pigpio daemon with this options for to use the frequencies: 'sudo pigpiod -t 0 -s 2'
+    frequencyRampUp = [250, 400, 625, 1000, 1250, 2000, 2500, 4000, 5000]
+
     rampLevels = 8
-    rampLevelFactor = 1.5
-    firstRampLevelSteps = 50
+    rampLevelFactor = 2
+    firstRampLevelSteps = 80
     
     if steps <= firstRampLevelSteps:
         return [[frequencyRampUp[0], steps]]
@@ -83,14 +99,3 @@ def calcRamp(steps):
         result.append([frequencyRampUp[reverseIndex], resultRamp[reverseIndex]])
     
     return result
-
-
-for i in range (1, 102000):
-    calcRamp(i)
-        
-#ramp = calcRamp(101)
-#print ramp
-
-#print "=== RESULT ==="
-#for i in ramp:
-#    print i
