@@ -179,7 +179,7 @@ class LpTenderStateMachine(object):
         with self._lock:
             self._autoFlip = bool(value)
 
-    def _execFctAndDoTransitionAfterwards(self, fct=None, args=None, transition=None, transitionCountBeforeFunc=0):    
+    def _execFctAndDoTransitionAfterwards(self, fct=None, args=None, transition=None, transitionCountBeforeFunc=None):    
         if fct != None:
             if args == None:
                 fct()
