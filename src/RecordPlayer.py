@@ -15,7 +15,7 @@ class RecordPlayer:
 
     def start(self):
         self._gpioController.output(self._gpioStart, self._gpioController.levelHigh())
-        sleep 1
+        sleep(1)
         self._gpioController.output(self._gpioStart, self._gpioController.levelLow())
         
         # wait until tonearm has left
@@ -27,21 +27,21 @@ class RecordPlayer:
             if timeoutCount > 15:
                 raise RuntimeError("Timeout")
             else:
-                sleep 1
+                sleep(1)
 
 
     def stop(self):
         self._gpioController.output(self._gpioStop, self._gpioController.levelHigh())
-        sleep 1
+        sleep(1)
         self._gpioController.output(self._gpioStop, self._gpioController.levelLow())
 
 
     def waitUntilStopped(self):
         while self._gpioController.input(self._gpioLightBarrier) != self._gpioController.levelHigh():
-            sleep 1
+            sleep(1)
         
         # give it some more time to settle after tonearm is returned
-        sleep 5
+        sleep(5)
 
 
         
