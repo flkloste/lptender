@@ -4,7 +4,7 @@ def checkContext(func):
     def decorator(self, *args, **kwargs):
         if self._contextCount == 0:  
              raise RuntimeError("Called out of context!")
-        func(self, *args, **kwargs)
+        return func(self, *args, **kwargs)
     return decorator
 
 class GpioType:
