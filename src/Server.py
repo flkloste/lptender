@@ -30,7 +30,7 @@ class LPTenderWebView(FlaskView):
     def get_status(self):
         if request.method == 'POST':
             status = self._lptender_model.getCurrentState()
-            resp = make_response('{"response": "ok", "status": "' + status + '"}')
+            resp = make_response('{"response": "ok", "status": "' + status + '", "autoflip": "' + str(self._lptender_model.autoFlip) + '" }')
             resp.headers['Content-Type'] = "application/json"
             return resp
 

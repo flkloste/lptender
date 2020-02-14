@@ -70,6 +70,56 @@
   -moz-border-radius: 5px;
   border-radius: 5px;
 }
+
+input[type=checkbox]{
+	height: 0;
+	width: 0;
+	visibility: hidden;
+}
+
+label {
+	cursor: pointer;
+	text-indent: -9999px;
+	width: 200px;
+	height: 100px;
+	background: rgb(180, 146, 104);
+	display: block;
+	border-radius: 100px;
+	position: relative;
+}
+
+label:after {
+	content: '';
+	position: absolute;
+	top: 5px;
+	left: 5px;
+	width: 90px;
+	height: 90px;
+	background: #fff;
+	border-radius: 90px;
+	transition: 0.3s;
+}
+
+input:checked + label {
+	background: #FFA12B;
+}
+
+input:checked + label:after {
+	left: calc(100% - 5px);
+	transform: translateX(-100%);
+}
+
+label:active:after {
+	width: 130px;
+}
+
+// centering
+body {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+}
 </style>
   
   
@@ -81,7 +131,7 @@
         var style_enabled =  "opacity:1;pointer-events: all;"
     </script>
     
-    <font face="helvetica">
+    
         <table>
             <tbody>
                 <tr>
@@ -116,7 +166,9 @@
                           </div>
                     </td>
                     <td> </td>
-                    <td align="right"> asfs </td>
+                    <td align="right"> 
+                        <input type="checkbox" id="switch" /><label id="label_autoflip" for="switch"  style="opacity:0.2;filter:alpha(opacity=40);pointer-events: none;"></label> <font  face="helvetica" size="28px">AutoFlip</font>
+                     </td>
                 </tr>
                 <tr>
                     <td align="right">Status</td>
@@ -151,22 +203,33 @@
                         case 'Stopped':
                             document.getElementById("div_play_button").style = style_enabled;
                             document.getElementById("div_stop_button").style = style_disabled;
+                            document.getElementById("label_autoflip").style = style_enabled;
                             break;
                         case 'Stopping':
                             document.getElementById("div_play_button").style = style_disabled;
                             document.getElementById("div_stop_button").style = style_disabled;
+                            document.getElementById("label_autoflip").style = style_disabled;
                             break;
                         case 'Playing':
                             document.getElementById("div_play_button").style = style_disabled;
                             document.getElementById("div_stop_button").style = style_enabled;
+                            document.getElementById("label_autoflip").style = style_enabled;
                             break;
                         case 'PlayPressed':
                             document.getElementById("div_play_button").style = style_disabled;
                             document.getElementById("div_stop_button").style = style_disabled;
+                            document.getElementById("label_autoflip").style = style_enabled;
                             break;
 					}
 						
-				
+                    if(json.autoflip == 'true')
+                    {
+                        document.getElementById("label_autoflip").checked = 'true'
+                    }
+                    else
+                    {
+                        document.getElementById("label_autoflip").checked = 'false'
+                    }
 					
         		}
         	});
