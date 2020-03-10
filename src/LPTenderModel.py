@@ -95,7 +95,7 @@ class _StateEndOfRecord(_StateBase):
         elif transition == Transitions.EndOfRecordToStop:
             return _StateStopped(self._stateMachine)
         else:
-            return self.ignoreTransition(transition)        
+            return self.ignoreTransition(transition)
 
 class _StateStopped(_StateBase):
     
