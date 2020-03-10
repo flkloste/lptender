@@ -20,7 +20,6 @@ class States(object):
     Stopped = 'Stopped'
     PlayPressed = 'PlayPressed'
     Flipping = 'Flipping'
-    AutoFlipping = 'AutoFlipping'
     EndOfRecord = 'EndOfRecord'
 
 class _StateBase(object):
@@ -87,19 +86,16 @@ class _StateEndOfRecord(_StateBase):
             nextTransition = Transitions.AutoFlip
         else:
             nextTransition = Transitions.EndOfRecordToStop
-        
-        def resetAutoFlip():
-            self._stateMachine.autoFlip = False
 
-        threading.Thread(target=self._stateMachine._execFctAndDoTransitionAfterwards, args=(resetAutoFlip, None, nextTransition, self._stateMachine._transitionCount)).start()
+        threading.Thread(target=self._stateMachine._execFctAndDoTransitionAfterwards, args=(None, None, nextTransition, self._stateMachine._transitionCount)).start()
         
     def doTransition(self, transition):
         if transition == Transitions.AutoFlip:
-            return _StateAutoFlipping(self._stateMachine)
+            return _StateFlipping(self._stateMachine)
         elif transition == Transitions.EndOfRecordToStop:
             return _StateStopped(self._stateMachine)
         else:
-            return self.ignoreTransition(transition)
+            return self.ignoreTransition(transition)        
 
 class _StateStopped(_StateBase):
     
@@ -130,26 +126,25 @@ class _StateFlipping(_StateBase):
     
     def __init__(self, stateMachine):
         super(_StateFlipping, self).__init__(States.Flipping, stateMachine)
-        threading.Thread(target=self._stateMachine._execFctAndDoTransitionAfterwards, args=(self._stateMachine._lptender.flip, None, Transitions.FlipDone, self._stateMachine._transitionCount)).start()
+        if self._stateMachine.autoFlip == True:
+            nextTransition = Transitions.PressPlayAfterAutoFlip
+        else:
+            nextTransition = Transitions.FlipDone
+
+        def FlipAndResetAutoFlip():
+            self._stateMachine._lptender.flip()
+            self._stateMachine.autoFlip = False
+        
+        threading.Thread(target=self._stateMachine._execFctAndDoTransitionAfterwards, args=(FlipAndResetAutoFlip, None, nextTransition, self._stateMachine._transitionCount)).start()
         
     def doTransition(self, transition):
         if transition == Transitions.FlipDone:
             return _StateStopped(self._stateMachine)
-        else:
-            return self.ignoreTransition(transition)
-
-class _StateAutoFlipping(_StateBase):
-    
-    def __init__(self, stateMachine):
-        super(_StateAutoFlipping, self).__init__(States.AutoFlipping, stateMachine)
-        threading.Thread(target=self._stateMachine._execFctAndDoTransitionAfterwards, args=(self._stateMachine._lptender.flip, None, Transitions.PressPlayAfterAutoFlip, self._stateMachine._transitionCount)).start()
-        
-    def doTransition(self, transition):
-        if transition == Transitions.PressPlayAfterAutoFlip:
+        elif transition == Transitions.PressPlayAfterAutoFlip:
             return _StatePlayPressed(self._stateMachine)
         else:
             return self.ignoreTransition(transition)
-        
+
 class LpTenderStateMachine(object):
     
     def __init__(self, lpTender):
@@ -194,4 +189,7 @@ class LpTenderStateMachine(object):
 
     def stop(self):
         self._doTransition(Transitions.PressStop)
+
+    def flip(self):
+        self._doTransition(Transitions.Flip)
 

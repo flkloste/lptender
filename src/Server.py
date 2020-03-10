@@ -27,10 +27,25 @@ class LPTenderWebView(FlaskView):
             resp.headers['Content-Type'] = "application/json"
             return resp
 
+    def flip(self):
+        if request.method == 'POST':
+            self._lptender_model.flip()
+            resp = make_response('{"response": "ok"}')
+            resp.headers['Content-Type'] = "application/json"
+            return resp
+
     def get_status(self):
         if request.method == 'POST':
             status = self._lptender_model.getCurrentState()
             resp = make_response('{"response": "ok", "status": "' + status + '", "autoflip": "' + str(self._lptender_model.autoFlip) + '" }')
+            resp.headers['Content-Type'] = "application/json"
+            return resp
+
+    def set_autoflip(self):
+        if request.method == 'POST':
+            autoflip_value = request.form['autoflip']
+            self._lptender_model.autoFlip = (autoflip_value == 'true')
+            resp = make_response('{"response": "ok"}')
             resp.headers['Content-Type'] = "application/json"
             return resp
 

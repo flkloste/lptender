@@ -187,6 +187,8 @@ body {
     <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
 
     <script>
+       var autoflip_ignore_status = false;
+
        function updateStatus() {
         	var $jsValueStatus = document.querySelector('.jsValueStatus');
         	var jqXHR = $.ajax({
@@ -204,38 +206,54 @@ body {
                             document.getElementById("div_play_button").style = style_enabled;
                             document.getElementById("div_stop_button").style = style_disabled;
                             document.getElementById("label_autoflip").style = style_enabled;
+                            document.getElementById("div_flip_button").style = style_enabled;
                             break;
                         case 'Stopping':
                             document.getElementById("div_play_button").style = style_disabled;
                             document.getElementById("div_stop_button").style = style_disabled;
                             document.getElementById("label_autoflip").style = style_disabled;
+                            document.getElementById("div_flip_button").style = style_disabled;
                             break;
                         case 'Playing':
                             document.getElementById("div_play_button").style = style_disabled;
                             document.getElementById("div_stop_button").style = style_enabled;
                             document.getElementById("label_autoflip").style = style_enabled;
+                            document.getElementById("div_flip_button").style = style_disabled;
                             break;
                         case 'PlayPressed':
                             document.getElementById("div_play_button").style = style_disabled;
                             document.getElementById("div_stop_button").style = style_disabled;
                             document.getElementById("label_autoflip").style = style_enabled;
+                            document.getElementById("div_flip_button").style = style_disabled;
+                            break;
+                        case 'Flipping':
+                            document.getElementById("div_play_button").style = style_disabled;
+                            document.getElementById("div_stop_button").style = style_disabled;
+                            document.getElementById("label_autoflip").style = style_disabled;
+                            document.getElementById("div_flip_button").style = style_disabled;
                             break;
 					}
 						
-                    if(json.autoflip == 'true')
+                    if(autoflip_ignore_status == false)
                     {
-                        document.getElementById("label_autoflip").checked = 'true'
+                        if(json.autoflip == 'True')
+                        {
+                            $("#switch").prop("checked", true);
+                        }
+                        else
+                        {
+                            $("#switch").prop("checked", false);
+                        }
                     }
                     else
                     {
-                        document.getElementById("label_autoflip").checked = 'false'
+                        autoflip_ignore_status = false;
                     }
-					
         		}
         	});
        }
 
-        setInterval(updateStatus, 600);
+        setInterval(updateStatus, 1000);
     </script>
 
     <script>
@@ -258,9 +276,37 @@ body {
                 	data: { }
             	});
             });
+        
+        $("#flip_button").click(function(){
+          		var jqXHR = $.ajax({
+                type: "POST",
+          		url: "flip",
+             	async: true,
+                	data: { }
+            	});
+            });
         });
         
-        
+        document.getElementById('switch').addEventListener('change', (event) => {
+
+        autoflip_ignore_status = true;
+
+        if (event.target.checked) {
+            var jqXHR = $.ajax({
+                type: "POST",
+          		url: "set_autoflip",
+             	async: true,
+                	data: { autoflip : true}
+            	});
+        } else {
+            var jqXHR = $.ajax({
+                type: "POST",
+          		url: "set_autoflip",
+             	async: true,
+                	data: { autoflip : false }
+            	});
+        }
+        })
     </script>
 	
    
