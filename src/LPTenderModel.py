@@ -91,7 +91,7 @@ class _StateEndOfRecord(_StateBase):
         
     def doTransition(self, transition):
         if transition == Transitions.AutoFlip:
-            return _StateFlipping(self._stateMachine)
+            return _StateFlipping(self._stateMachine, True)
         elif transition == Transitions.EndOfRecordToStop:
             return _StateStopped(self._stateMachine)
         else:
@@ -124,16 +124,18 @@ class _StatePlayPressed(_StateBase):
     
 class _StateFlipping(_StateBase):
     
-    def __init__(self, stateMachine):
+    def __init__(self, stateMachine, autoflip=False):
         super(_StateFlipping, self).__init__(States.Flipping, stateMachine)
-        if self._stateMachine.autoFlip == True:
+        
+        if autoflip:
             nextTransition = Transitions.PressPlayAfterAutoFlip
         else:
             nextTransition = Transitions.FlipDone
 
         def FlipAndResetAutoFlip():
             self._stateMachine._lptender.flip()
-            self._stateMachine.autoFlip = False
+            if autoflip:
+                self._stateMachine.autoFlip = False
         
         threading.Thread(target=self._stateMachine._execFctAndDoTransitionAfterwards, args=(FlipAndResetAutoFlip, None, nextTransition, self._stateMachine._transitionCount)).start()
         

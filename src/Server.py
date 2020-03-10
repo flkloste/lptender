@@ -49,6 +49,11 @@ class LPTenderWebView(FlaskView):
             resp.headers['Content-Type'] = "application/json"
             return resp
 
+    def emergency_shutdown(self):
+        func = request.environ.get('werkzeug.server.shutdown')
+        if func is None:
+            raise RuntimeError('Not running with the Werkzeug Server')
+        func()
 
 if __name__ == '__main__':
     app = Flask(__name__)
