@@ -1,0 +1,352 @@
+<head>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+   
+<style>
+ body {
+        background-color:rgb(54, 54, 54);  
+      }
+
+* {
+    -webkit-touch-callout:none;
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -ms-user-select:none;
+    user-select:none;
+}
+
+.button{
+  position:relative;
+  display:inline-block;
+  margin:20px;
+}
+
+.button a{
+  color:white;
+  font-family:Helvetica, sans-serif;
+  font-weight:bold;
+  font-size:36px;
+  text-align: center;
+  text-decoration:none;
+  background-color:#FFA12B;
+  display:block;
+  position:relative;
+  padding:20px 40px;
+  
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  text-shadow: 0px 1px 0px #000;
+  filter: dropshadow(color=#000, offx=0px, offy=1px);
+  
+  -webkit-box-shadow:inset 0 1px 0 #FFE5C4, 0 10px 0 #915100;
+  -moz-box-shadow:inset 0 1px 0 #FFE5C4, 0 10px 0 #915100;
+  box-shadow:inset 0 1px 0 #FFE5C4, 0 10px 0 #915100;
+  
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+
+.button a:active{
+  top:10px;
+  background-color:#F78900;
+  
+  -webkit-box-shadow:inset 0 1px 0 #FFE5C4, inset 0 -3px 0 #915100;
+  -moz-box-shadow:inset 0 1px 0 #FFE5C4, inset 0 -3pxpx 0 #915100;
+  box-shadow:inset 0 1px 0 #FFE5C4, inset 0 -3px 0 #915100;
+}
+
+.button:after{
+  content:"";
+  height:100%;
+  width:100%;
+  padding:4px;
+  position: absolute;
+  bottom:-15px;
+  left:-4px;
+  z-index:-1;
+  background-color:#2B1800;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+input[type=checkbox]{
+	height: 0;
+	width: 0;
+	visibility: hidden;
+}
+
+label {
+	cursor: pointer;
+	text-indent: -9999px;
+	width: 120px;
+	height: 50px;
+	background: rgb(180, 146, 104);
+	display: block;
+	border-radius: 100px;
+	position: relative;
+}
+
+label:after {
+	content: '';
+	position: absolute;
+	top: 5px;
+	left: 5px;
+	width: 40px;
+	height: 40px;
+	background: #fff;
+	border-radius: 40px;
+	transition: 0.3s;
+}
+
+input:checked + label {
+	background: #FFA12B;
+}
+
+input:checked + label:after {
+	left: calc(100% - 5px);
+	transform: translateX(-100%);
+}
+
+label:active:after {
+	width: 130px;
+}
+
+// centering
+body {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+}
+</style>
+  
+  
+</head>
+<body>
+    
+    <script>
+        var style_disabled =  "opacity:0.4;filter:alpha(opacity=40);pointer-events: none;"
+        var style_enabled =  "opacity:1;pointer-events: all;"
+    </script>
+    
+    
+        <table>
+            <tbody>
+                <tr>
+                    <td align="right">
+                        <div ontouchstart="" draggable="false">
+                            <div class="button" id="div_play_button" ondragstart="return false;" style="opacity:0.4;filter:alpha(opacity=40);pointer-events: none;">
+                              <a id="play_button" href="#" ondragstart="return false;">
+                                  <i class="material-icons" style="font-size: 2em;">play_circle_outline</i>Play
+                              </a>
+                            </div>
+                          </div>
+                    </td>
+                    <td> </td>
+                    <td align="right"> 
+                        <div ontouchstart="">
+                          <div class="button" id="div_stop_button" ondragstart="return false;" style="opacity:0.4;filter:alpha(opacity=40);pointer-events: none;">
+                            <a id="stop_button" href="#">
+                                <i class="material-icons" style="font-size: 2em;">stop</i>Stop
+                            </a>
+                          </div>
+                        </div>
+                         </td>
+                </tr>
+                <tr>
+                    <td rowspan="2">
+                        <div ontouchstart="">
+                            <div class="button" id="div_flip_button" ondragstart="return false;" style="opacity:0.4;filter:alpha(opacity=40);pointer-events: none;">
+                              <a id="flip_button" href="#">
+                                  <i class="material-icons" style="font-size: 2em;">cached</i>Flip
+                              </a>
+                            </div>
+                          </div>
+                    </td>
+                    <td> </td>
+                    <td align="center"> 
+                        
+                        <input type="checkbox" id="switch" />
+                        <label id="label_autoflip" for="switch"  style="opacity:0.2;filter:alpha(opacity=40);pointer-events: none;"></label>
+                            
+                     </td>
+                </tr>
+                <tr>
+                    <td> </td>
+                    <td align="center" valign="top"> <font face="helvetica" size="5px" color="grey">AutoFlip
+                            
+                     </td>
+                </tr>
+                <tr>
+                    <br/>
+                </tr>
+                <tr><td><br></td></tr>
+                <tr align="center">
+                    <td colspan="3" >
+                    <font face="helvetica" size="18px" color="grey">
+                        <br\>
+                        <br\>
+                        <span class="jsValueStatus">-</span>
+                
+                        </font>
+                    </td>
+                </tr>
+                <tr><td><br></td></tr>
+                <tr><td><br></td></tr>
+                <tr><td><br></td></tr>
+                <tr>
+                    <td>
+                        <a href="" title="Emergency Stop" id="emergency_link">Emergency Stop</a>
+                    </td>
+                </tr>
+               
+            </tbody>
+        </table>
+
+        
+    
+  
+    <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+
+    <script>
+
+        var el = document.getElementById('emergency_link');
+        el.onclick = emergencyStop;
+
+
+        function emergencyStop() {            
+            var jqXHR = $.ajax({
+                type: "POST",
+          		url: "emergency_shutdown",
+             	async: true,
+                	data: { }
+                });
+            alert("Emergency Shutdown")
+        }
+
+       var autoflip_ignore_status = false;
+
+       function updateStatus() {
+        	var $jsValueStatus = document.querySelector('.jsValueStatus');
+        	var jqXHR = $.ajax({
+        		type: "POST",
+        		url: "get_status",
+        		async: true,
+        		dataType: "json",
+        		data: { },
+        		success: function (json) {
+        			$jsValueStatus.innerHTML = json.status;
+					
+					switch($jsValueStatus.innerHTML)
+					{
+                        case 'Stopped':
+                            document.getElementById("div_play_button").style = style_enabled;
+                            document.getElementById("div_stop_button").style = style_disabled;
+                            document.getElementById("label_autoflip").style = style_enabled;
+                            document.getElementById("div_flip_button").style = style_enabled;
+                            break;
+                        case 'Stopping':
+                            document.getElementById("div_play_button").style = style_disabled;
+                            document.getElementById("div_stop_button").style = style_disabled;
+                            document.getElementById("label_autoflip").style = style_disabled;
+                            document.getElementById("div_flip_button").style = style_disabled;
+                            break;
+                        case 'Playing':
+                            document.getElementById("div_play_button").style = style_disabled;
+                            document.getElementById("div_stop_button").style = style_enabled;
+                            document.getElementById("label_autoflip").style = style_enabled;
+                            document.getElementById("div_flip_button").style = style_disabled;
+                            break;
+                        case 'PlayPressed':
+                            document.getElementById("div_play_button").style = style_disabled;
+                            document.getElementById("div_stop_button").style = style_disabled;
+                            document.getElementById("label_autoflip").style = style_enabled;
+                            document.getElementById("div_flip_button").style = style_disabled;
+                            break;
+                        case 'Flipping':
+                            document.getElementById("div_play_button").style = style_disabled;
+                            document.getElementById("div_stop_button").style = style_disabled;
+                            document.getElementById("label_autoflip").style = style_disabled;
+                            document.getElementById("div_flip_button").style = style_disabled;
+                            break;
+					}
+						
+                    if(autoflip_ignore_status == false)
+                    {
+                        if(json.autoflip == 'True')
+                        {
+                            $("#switch").prop("checked", true);
+                        }
+                        else
+                        {
+                            $("#switch").prop("checked", false);
+                        }
+                    }
+                    else
+                    {
+                        autoflip_ignore_status = false;
+                    }
+        		}
+        	});
+       }
+
+        setInterval(updateStatus, 1000);
+    </script>
+
+    <script>
+        $(document).ready(function() {
+
+         $("#play_button").click(function(){
+          		var jqXHR = $.ajax({
+                type: "POST",
+          		url: "play",
+             	async: true,
+                	data: { }
+            	});
+            });
+    
+        $("#stop_button").click(function(){
+          		var jqXHR = $.ajax({
+                type: "POST",
+          		url: "stop",
+             	async: true,
+                	data: { }
+            	});
+            });
+        
+        $("#flip_button").click(function(){
+          		var jqXHR = $.ajax({
+                type: "POST",
+          		url: "flip",
+             	async: true,
+                	data: { }
+            	});
+            });
+        });
+        
+        document.getElementById('switch').addEventListener('change', (event) => {
+
+        autoflip_ignore_status = true;
+
+        if (event.target.checked) {
+            var jqXHR = $.ajax({
+                type: "POST",
+          		url: "set_autoflip",
+             	async: true,
+                	data: { autoflip : true}
+            	});
+        } else {
+            var jqXHR = $.ajax({
+                type: "POST",
+          		url: "set_autoflip",
+             	async: true,
+                	data: { autoflip : false }
+            	});
+        }
+        })
+    </script>
+	
+   
+</body>
