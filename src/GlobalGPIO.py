@@ -7,16 +7,14 @@ def checkContext(func):
         return func(self, *args, **kwargs)
     return decorator
 
-class GpioType:
-    INPUT = 0
-    OUTPUT = 1
-    PWM = 2
-
 class GlobalGPIO:
     
     class _Impl:
         def __init__(self):
-            self._usedGPIOs = list()
+            self._outputGPIOs = list()
+            self._inputGPIOs = list()
+            self._servoGPIOs = list()
+            self._pwmGPIOs = list()
             self._contextCount = 0
 
         def __enter__(self):
@@ -26,28 +24,38 @@ class GlobalGPIO:
             return self
             
         def __exit__(self, exc_type, exc_value, exc_traceback):
-            self._contextCount -= 1
             
-            if self._contextCount == 0:
-                # stop all pwm output (servo)
-                for pwmGpio in [gpio for (gpio, type) in self._usedGPIOs if type == GpioType.PWM]:
-                    self._pi.set_servo_pulsewidth(pwmGpio, 0)
-                
-                del self._usedGPIOs[:]
+            self._contextCount -= 1
 
+            if self._contextCount == 0:
+                
+                # stop all servos
+                for servoGpio in self._servoGPIOs:
+                    self._pi.set_servo_pulsewidth(servoGpio, 0)
+
+                # stop all pwms
+                for pwmGpio in self._pwmGPIOs:
+                     self._pi.set_PWM_dutycycle(pwmGpio, 0)
+                
+                del self._outputGPIOs[:]
+                del self._inputGPIOs[:]
+                del self._servoGPIOs[:]
+                del self._pwmGPIOs[:]
+                
                 self._pi.stop()
+            
 
         @checkContext
         def setupOutput(self, gpioBcmNo):
-            if gpioBcmNo in [gpio for (gpio, type) in self._usedGPIOs]:
+            if gpioBcmNo in self._outputGPIOs + self._inputGPIOs:
                 raise RuntimeError("GPIO %s already in use!" % str(gpioBcmNo))
                 
             self._pi.set_mode(gpioBcmNo, pigpio.OUTPUT)
-            self._usedGPIOs.append((gpioBcmNo, GpioType.OUTPUT))
+            self._outputGPIOs.append(gpioBcmNo)
         
         @checkContext
         def setupInput(self, gpioBcmNo, pullUpDown=None):
-            if gpioBcmNo in [gpio for (gpio, type) in self._usedGPIOs]:
+            if gpioBcmNo in self._outputGPIOs + self._inputGPIOs:
                 raise RuntimeError("GPIO %s already in use!" % str(gpioBcmNo))
                 
             if pullUpDown not in [None, self.inputPullUp(), self.inputPullDown()]:
@@ -59,11 +67,11 @@ class GlobalGPIO:
                 self._pi.set_mode(gpioBcmNo, pigpio.INPUT)
                 self._pi.set_pull_up_down(gpioBcmNo, pullUpDown)
                 
-            self._usedGPIOs.append((gpioBcmNo, GpioType.INPUT))
+            self._inputGPIOs.append(gpioBcmNo)
         
         @checkContext
         def output(self, gpioBcmNo, level):
-            if gpioBcmNo not in [gpio for (gpio, type) in self._usedGPIOs if type == GpioType.OUTPUT]:
+            if gpioBcmNo not in self._outputGPIOs:
                 raise RuntimeError("GPIO %s has not been set up as an output!" % str(gpioBcmNo))
 
             if level not in [self.levelHigh(), self.levelLow()]:
@@ -73,14 +81,14 @@ class GlobalGPIO:
         
         @checkContext
         def input(self, gpioBcmNo):
-            if gpioBcmNo not in [gpio for (gpio, type) in self._usedGPIOs if type == GpioType.INPUT]:
+            if gpioBcmNo not in self._inputGPIOs:
                 raise RuntimeError("GPIO %s has not been set up as an input!" % str(gpioBcmNo))
                 
             return self._pi.read(gpioBcmNo)
 
         @checkContext
         def setServoPulseWidth(self, gpioBcmNo, pulseWidth):
-            if gpioBcmNo in [gpio for (gpio, type) in self._usedGPIOs if (type in [GpioType.INPUT, GpioType.OUTPUT])]:
+            if gpioBcmNo in self._outputGPIOs + self._inputGPIOs:
                 raise RuntimeError("GPIO %s already in use!" % str(gpioBcmNo))
                 
             if pulseWidth not in range(500, 2500) and pulseWidth != 0:
@@ -88,23 +96,24 @@ class GlobalGPIO:
 
             self._pi.set_servo_pulsewidth(gpioBcmNo, pulseWidth)
             
-            if gpioBcmNo not in [gpio for (gpio, type) in self._usedGPIOs]:
-                self._usedGPIOs.append((gpioBcmNo, GpioType.PWM))
+            self._servoGPIOs.append(gpioBcmNo)
 
         @checkContext
         def setPwm(self, gpioBcmNo, dutycycle, frequency):
-            if gpioBcmNo not in [gpio for (gpio, type) in self._usedGPIOs if type == GpioType.OUTPUT]:
+            if gpioBcmNo not in self._outputGPIOs:
                 raise RuntimeError("GPIO %s has not been set up as an output!" % str(gpioBcmNo))
 
             self._pi.set_PWM_dutycycle(gpioBcmNo, dutycycle) 
             self._pi.set_PWM_frequency(gpioBcmNo, frequency)
+            self._pwmGPIOs.append(gpioBcmNo)
 
         @checkContext
         def stopPwm(self, gpioBcmNo):
-            if gpioBcmNo not in [gpio for (gpio, type) in self._usedGPIOs if type == GpioType.OUTPUT]:
-                raise RuntimeError("GPIO %s has not been set up as an output!" % str(gpioBcmNo))
+            if gpioBcmNo not in self._pwmGPIOs:
+                raise RuntimeError("GPIO %s has not been set up as PWM!" % str(gpioBcmNo))
 
             self._pi.set_PWM_dutycycle(gpioBcmNo, 0)
+            self._pwmGPIOs.remove(gpioBcmNo)
 
         def levelHigh(self):
             return 1
@@ -124,6 +133,9 @@ class GlobalGPIO:
             https://www.rototron.info/raspberry-pi-stepper-motor-tutorial/
             ramp:  List of [Frequency, Steps]
             """
+            if step_gpio not in self._outputGPIOs:
+                raise RuntimeError("GPIO %s has not been set up as an output!" % str(step_gpio))
+
             self._pi.wave_clear()     # clear existing waves
             length = len(ramp)  # number of ramp levels
             wid = [-1] * length
@@ -147,6 +159,8 @@ class GlobalGPIO:
                 chain += [255, 0, wid[i], 255, 1, x, y]
 
             self._pi.wave_chain(chain)  # Transmit chain.
+
+            self._pwmGPIOs.append(step_gpio)
 
      # storage for the instance reference
     __instance = None  
