@@ -43,7 +43,7 @@ class Elevator:
         if self._endstop.isClosed():
             self._drv8825.moveUntilStopped(self._drv8825.counterClockWise(), self._drv8825.PWM_FREQUENCY_SLOW)
 
-        while not self._endstop.isClosed():
+        while self._endstop.isClosed():
             sleep(0.01)
         
         self._drv8825.stop()
