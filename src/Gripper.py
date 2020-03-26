@@ -2,16 +2,16 @@ import Servo
 from time import sleep
 
 class Gripper:
-    def __init__(self, globalGPIO):
-        self._gpioLeftServoControl = 27
-        self._gpioRightServoControl = 22
+    def __init__(self, globalGPIO, config):
+        self._gpioLeftServoControl = config.gripper.gpioLeftServoControl #27
+        self._gpioRightServoControl = config.gripper.gpioRightServoControl #22
         self._leftServo = Servo.ServoDS3218_180(globalGPIO, self._gpioLeftServoControl)
         self._rightServo = Servo.ServoDS3218_180(globalGPIO, self._gpioRightServoControl)
-        self._rightServoCloseAngle = 106
-        self._rightServoOpenAngle = 100
+        self._rightServoCloseAngle = config.gripper.rightServoCloseAngle #106
+        self._rightServoOpenAngle = config.gripper.rightServoOpenAngle #100
         self._rightServoCurrentAngle = -1
-        self._leftServoCloseAngle = 73 
-        self._leftServoOpenAngle = 79
+        self._leftServoCloseAngle = config.gripper.leftServoCloseAngle #73 
+        self._leftServoOpenAngle = config.gripper.leftServoOpenAngle #79
         self._leftServoCurrentAngle = -1
         
     def grip(self):

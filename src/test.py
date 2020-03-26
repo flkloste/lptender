@@ -15,7 +15,7 @@ if __name__ == "__main__":
     config = GlobalConfig()
 
     with GlobalGPIO.GlobalGPIO() as gpio:
-        gripper = Gripper.Gripper(gpio)
+        gripper = Gripper.Gripper(gpio, config)
         gripper.release() 
         sleep(2)
      #   gripper.grip()

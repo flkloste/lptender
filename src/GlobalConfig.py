@@ -50,10 +50,29 @@ class GlobalConfig(object):
         @property
         def leftServoOpenAngle(self):
             return self._leftServoOpenAngle
+
+    class ServoRotate(object):
+        def __init__(self):
+            self._gpio = 17
+            self._rotate_0 = 180
+            self._rotate_180 = 5
+
+        @property
+        def gpio(self):
+            return self._gpio
+
+        @property
+        def rotate_0(self):
+            return self._rotate_0
+
+        @property
+        def rotate_180(self):
+            return self._rotate_180
         
     def __init__(self):
         self._elevator = GlobalConfig.Elevator()
         self._gripper = GlobalConfig.Gripper()
+        self._servo_rotate = GlobalConfig.ServoRotate()
 
     @property
     def elevator(self):
@@ -63,3 +82,6 @@ class GlobalConfig(object):
     def gripper(self):
         return self._gripper
 
+    @property
+    def servo_rotate(self):
+        return self._servo_rotate

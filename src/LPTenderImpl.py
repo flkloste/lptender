@@ -9,9 +9,13 @@ class LpTenderMock(object):
         self._gpioController  = gpioController
         self._config = config
         self._elevator = Elevator.Elevator(self._config, self._gpioController)
-        self._gripper = Gripper.Gripper(gpio)
+        self._gripper = Gripper.Gripper(gpioController, config)
+        self._servoRotate = Servo.ServoDS3218_270(gpio, self._config.servo_rotate.gpio)
+
     def initialize(self):
-        raise 1
+        self._gripper.release()
+        self._elevator.gotoHome()
+        
     def pressPlay(self):
         raise 1
     def waitForPlaying(self):
