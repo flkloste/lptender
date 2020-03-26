@@ -8,12 +8,11 @@ class Gripper:
         self._leftServo = Servo.ServoDS3218_180(globalGPIO, self._gpioLeftServoControl)
         self._rightServo = Servo.ServoDS3218_180(globalGPIO, self._gpioRightServoControl)
         self._rightServoCloseAngle = 106
-        self._rightServoOpenAngle = 99
+        self._rightServoOpenAngle = 100
         self._rightServoCurrentAngle = -1
         self._leftServoCloseAngle = 73 
         self._leftServoOpenAngle = 79
         self._leftServoCurrentAngle = -1
-
         
     def grip(self):
         if ( self._leftServoCurrentAngle < 0 

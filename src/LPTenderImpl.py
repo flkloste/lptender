@@ -4,23 +4,21 @@ import GlobalGPIO
 from time import sleep
 
 
-if __name__ == "__main__":
-    gpio = GlobalGPIO.GlobalGPIO()
-    #elevator = Elevator.Elevator(gpio)
-    
-    servo = Servo.ServoDS3218_180(gpio, 17)
-    
-    servo.setAngle(65)
-    sleep(1)
-    servo.dontMove()
-
-    sleep(1)
-    servo.setAngle(85)
-    sleep(1)
-    servo.dontMove()
-    sleep(1) 
-    #elevator.gotoHome()
-    #elevator.moveDown(20000)
-    
-    #elevator.moveUp(10000)
-    
+class LpTenderMock(object):
+    def __init__(gpioController, config):
+        self._gpioController  = gpioController
+        self._config = config
+        self._elevator = Elevator.Elevator(self._config, self._gpioController)
+        self._gripper = Gripper.Gripper(gpio)
+    def initialize(self):
+        raise 1
+    def pressPlay(self):
+        raise 1
+    def waitForPlaying(self):
+        raise 1    
+    def stop(self):
+        raise 1        
+    def waitForEndOfRecord(self):
+        raise 1
+    def flip(self):
+        raise 1
