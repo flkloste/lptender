@@ -5,6 +5,8 @@ class GlobalConfig(object):
             self._gpioStep = 21
             self._gpioDirection = 20
             self._gpioEndstopSignal = 4
+            self._home_to_base = 100000
+            self._flipped_delta = 18000
         
         @property
         def gpioStep(self):
@@ -17,6 +19,14 @@ class GlobalConfig(object):
         @property
         def gpioEndstopSignal(self):
             return self._gpioEndstopSignal
+
+        @property
+        def home_to_base(self):
+            return self._home_to_base
+
+        @property
+        def flipped_delta(self):
+            return self._flipped_delta
 
     class Gripper(object):
         def __init__(self):
@@ -68,11 +78,30 @@ class GlobalConfig(object):
         @property
         def rotate_180(self):
             return self._rotate_180
+
+    class RecordPlayer(object):
+        def __init__(self):
+            self._gpio_start = 14
+            self._gpio_stop = 15
+            self._gpio_light_barrier = 18
+
+        @property
+        def gpio_start(self):
+            return self._gpio_start
+
+        @property
+        def gpio_stop(self):
+            return self._gpio_stop
         
+        @property
+        def gpio_light_barrier(self):
+            return self._gpio_light_barrier
+
     def __init__(self):
         self._elevator = GlobalConfig.Elevator()
         self._gripper = GlobalConfig.Gripper()
         self._servo_rotate = GlobalConfig.ServoRotate()
+        self._record_player = GlobalConfig.RecordPlayer()
 
     @property
     def elevator(self):
@@ -85,3 +114,7 @@ class GlobalConfig(object):
     @property
     def servo_rotate(self):
         return self._servo_rotate
+
+    @property
+    def record_player(self):
+        return self._record_player

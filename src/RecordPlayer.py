@@ -2,8 +2,8 @@ from time import sleep
 
 class RecordPlayer:
 
-    def __init__(self, globalGPIO, gpioStart, gpioStop, gpioLightBarrier):
-        self._gpioController = globalGPIO
+    def __init__(self, gpioController, gpioStart, gpioStop, gpioLightBarrier):
+        self._gpioController = gpioController
         self._gpioStart = gpioStart
         self._gpioStop = gpioStop
         self._gpioLightBarrier = gpioLightBarrier
