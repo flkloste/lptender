@@ -44,4 +44,5 @@ class RecordPlayer:
         sleep(5)
 
 
-        
+    def isStopped(self):
+        return self._gpioController.input(self._gpioLightBarrier) == self._gpioController.levelHigh():
