@@ -9,7 +9,7 @@ def checkInitialized(func):
     def funcWrap(self, *args, **kwargs):
         if not self._ready:
             raise RuntimeError("Lptender is not initialized!")
-            func(*args, **kwargs)    
+        return func(self, *args, **kwargs)    
     return funcWrap
 
 class LpTenderImpl(object):
