@@ -198,6 +198,11 @@ body {
                 <tr><td><br></td></tr>
                 <tr>
                     <td>
+                        <a href="" title="Init" id="init_link">Init</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
                         <a href="" title="Emergency Stop" id="emergency_link">Emergency Stop</a>
                     </td>
                 </tr>
@@ -224,6 +229,19 @@ body {
                 	data: { }
                 });
             alert("Emergency Shutdown")
+        }
+
+        var initlink = document.getElementById('init_link');
+        initlink.onclick = init;
+
+        function init() {            
+            var jqXHR = $.ajax({
+                type: "POST",
+          		url: "init",
+             	async: true,
+                	data: { }
+                });
+            alert("Init")
         }
 
        var autoflip_ignore_status = false;
@@ -265,6 +283,7 @@ body {
                             document.getElementById("label_autoflip").style = style_enabled;
                             document.getElementById("div_flip_button").style = style_disabled;
                             break;
+                        case 'Start':
                         case 'Flipping':
                             document.getElementById("div_play_button").style = style_disabled;
                             document.getElementById("div_stop_button").style = style_disabled;

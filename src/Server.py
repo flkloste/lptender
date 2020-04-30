@@ -55,6 +55,13 @@ class LPTenderWebView(FlaskView):
             raise RuntimeError('Not running with the Werkzeug Server')
         func()
 
+    def init(self):
+        if request.method == 'POST':
+            self._lptender_model.init()
+            resp = make_response('{"response": "ok"}')
+            resp.headers['Content-Type'] = "application/json"
+            return resp
+
 if __name__ == '__main__':
     app = Flask(__name__)
 
@@ -62,4 +69,4 @@ if __name__ == '__main__':
     lptender_model = LPTenderModel.LpTenderStateMachine(lptender_impl)
 
     LPTenderWebView.register(app, init_argument=lptender_model)
-    app.run()
+    app.run(host='0.0.0.0')

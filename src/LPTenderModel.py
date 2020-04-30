@@ -1,6 +1,7 @@
 import threading
 
 class Transitions(object):
+    Init = 'Init'
     PressPlay = 'PressPlay'
     PlayingReady = 'PlayingReady'
     EndOfRecordTransition = 'EndOfRecordTransition'
@@ -14,6 +15,7 @@ class Transitions(object):
     PressPlayAfterAutoFlip = 'PressPlayAfterAutoFlip'
 
 class States(object):
+    Start = 'Start'
     Initializing = 'Initializing'
     Playing = 'Playing'
     Stopping = 'Stopping'
@@ -39,6 +41,17 @@ class _StateBase(object):
     
     def __str__(self):
         return self._name
+
+class _StateStart(_StateBase):
+    
+    def __init__(self, stateMachine):
+        super(_StateStart, self).__init__(States.Start, stateMachine)
+        
+    def doTransition(self, transition):
+        if transition == Transitions.Init:
+            return _StateInitializing(self._stateMachine)
+        else:
+            return self.ignoreTransition(transition)
 
 class _StateInitializing(_StateBase):
     
@@ -153,7 +166,7 @@ class LpTenderStateMachine(object):
         self._lock = threading.Lock()
         self._lptender = lpTender
         self._transitionCount = 0
-        self._state = _StateInitializing(self)
+        self._state = _StateStart(self)
         self._autoFlip = False
         
     def _doTransition(self, transition, numberOfTransititionsForCompare=None):
@@ -194,4 +207,7 @@ class LpTenderStateMachine(object):
 
     def flip(self):
         self._doTransition(Transitions.Flip)
+
+    def init(self):
+        self._doTransition(Transitions.Init)
 
