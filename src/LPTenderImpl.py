@@ -1,6 +1,6 @@
 import Elevator
 import Servo
-import GlobalGPIO
+import Gripper
 import RecordPlayer
 from time import sleep
 from threading import Lock
@@ -14,7 +14,7 @@ def checkInitialized(func):
 
 class LpTenderImpl(object):
 
-    def __init__(gpioController, config):
+    def __init__(self, gpioController, config):
         self._gpioController  = gpioController
         self._config = config
         self._elevator = Elevator.Elevator(self._config, self._gpioController)
@@ -39,9 +39,9 @@ class LpTenderImpl(object):
             self._gripper.release()
             self._elevator.gotoHome()
 
-            self._servo_rotate.setAngle(self.ROTATE_0)
+            self._servoRotate.setAngle(self.ROTATE_0)
             sleep(2)
-            self._servo_rotate.dontMove()
+            self._servoRotate.dontMove()
 
             self._elevator.moveDown(self.HOME_TO_BASE)
             sleep(1)

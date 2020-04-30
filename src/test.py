@@ -17,7 +17,7 @@ if __name__ == "__main__":
     with GlobalGPIO.GlobalGPIO() as gpio:
         gripper = Gripper.Gripper(gpio, config)
         gripper.release() 
-        sleep(2)
+       # sleep(2)
      #   gripper.grip()
      #   sleep(2)
     #    gripper.release()
@@ -33,14 +33,14 @@ if __name__ == "__main__":
        
       #  gripper.grip()
 
-        ROTATE_0 = 180
-        ROTATE_180 = 5
+        ROTATE_0 = 185.5
+        ROTATE_180 = 6
 
         # slowly
       
       #  servo_rotate.setAngle(ROTATE_180)
       #  sleep(3)
-        servo_rotate.setAngle(ROTATE_0)
+        servo_rotate.setAngle(ROTATE_180)
       #  sleep(3)
       
       #  sleep(3)
@@ -50,33 +50,33 @@ if __name__ == "__main__":
         sleep(2)
         servo_rotate.dontMove()
       #  gripper.release()
-        elevator.moveDown(HOME_TO_BASE)
+      #  elevator.moveDown(HOME_TO_BASE)
        
 
 
         sleep(2)
         
-  #      elevator.moveDown(HOME_TO_BASE)
-
-     #   sleep(1)
-
-        gripper.grip()
-
-        sleep(2)
-
-        elevator.gotoHome()
-
-        servo_rotate.setAngle(ROTATE_180)
-        sleep(2)
-        servo_rotate.dontMove()
-
         elevator.moveDown(HOME_TO_BASE - FLIPPED_DELTA)
-        sleep(2)
-        gripper.release()
+
+        sleep(1)
+
+    #    gripper.grip()
+
+    #    sleep(2)
+
+     #   elevator.gotoHome()
+
+      #  servo_rotate.setAngle(ROTATE_180)
+       # sleep(2)
+        #servo_rotate.dontMove()
+
+    #    elevator.moveDown(HOME_TO_BASE - FLIPPED_DELTA)
+     #   sleep(2)
+      #  gripper.release()
 
         #elevator.gotoHome()
         #servo_rotate.setAngle(ROTATE_180)
         #sleep(4)
         #elevator.moveDown(HOME_TO_BASE - FLIPPED_DELTA)
         #gripper.release()
-        sleep(3)
+#        sleep(3)

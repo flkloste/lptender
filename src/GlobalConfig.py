@@ -64,8 +64,8 @@ class GlobalConfig(object):
     class ServoRotate(object):
         def __init__(self):
             self._gpio = 17
-            self._rotate_0 = 180
-            self._rotate_180 = 5
+            self._rotate_0 = 185.5
+            self._rotate_180 = 6
 
         @property
         def gpio(self):

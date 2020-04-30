@@ -1,7 +1,9 @@
 from flask import Flask, render_template, request, make_response
 from flask_classful import FlaskView
-import LPTenderImplMock
+import LPTenderImpl
 import LPTenderModel
+import GlobalConfig
+import GlobalGPIO
 
 class LPTenderWebView(FlaskView):
     route_base = '/'
@@ -65,8 +67,12 @@ class LPTenderWebView(FlaskView):
 if __name__ == '__main__':
     app = Flask(__name__)
 
-    lptender_impl = LPTenderImplMock.LpTenderMock()
-    lptender_model = LPTenderModel.LpTenderStateMachine(lptender_impl)
+    config = GlobalConfig.GlobalConfig()
 
-    LPTenderWebView.register(app, init_argument=lptender_model)
-    app.run(host='0.0.0.0')
+    with GlobalGPIO.GlobalGPIO() as gpio:
+        
+        lptender_impl = LPTenderImpl.LpTenderImpl(gpio, config)
+        lptender_model = LPTenderModel.LpTenderStateMachine(lptender_impl)
+
+        LPTenderWebView.register(app, init_argument=lptender_model)
+        app.run(host='0.0.0.0')

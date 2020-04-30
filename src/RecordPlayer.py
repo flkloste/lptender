@@ -8,7 +8,7 @@ class RecordPlayer:
         self._gpioStop = gpioStop
         self._gpioLightBarrier = gpioLightBarrier
 
-        self._gpioController.setupInput(self._gpioLightBarrier, self._gpio.inputPullDown())
+        self._gpioController.setupInput(self._gpioLightBarrier, self._gpioController.inputPullDown())
         self._gpioController.setupOutput(self._gpioStart)
         self._gpioController.setupOutput(self._gpioStop)
 
@@ -45,4 +45,4 @@ class RecordPlayer:
 
 
     def isStopped(self):
-        return self._gpioController.input(self._gpioLightBarrier) == self._gpioController.levelHigh():
+        return self._gpioController.input(self._gpioLightBarrier) == self._gpioController.levelHigh()
