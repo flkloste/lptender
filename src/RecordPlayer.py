@@ -27,7 +27,8 @@ class RecordPlayer:
             if timeoutCount > 15:
                 raise RuntimeError("Timeout")
             else:
-                sleep(1)
+                # after tonearm has left, give it 10 more seconds to settle on the lp
+                sleep(10)
 
 
     def stop(self):
