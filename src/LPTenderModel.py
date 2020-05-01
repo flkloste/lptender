@@ -146,9 +146,11 @@ class _StateFlipping(_StateBase):
             nextTransition = Transitions.FlipDone
 
         def FlipAndResetAutoFlip():
-            self._stateMachine._lptender.flip()
             if autoflip:
+                self._stateMachine._lptender.flip(autoplay=True)
                 self._stateMachine.autoFlip = False
+            else:
+                self._stateMachine._lptender.flip()
         
         threading.Thread(target=self._stateMachine._execFctAndDoTransitionAfterwards, args=(FlipAndResetAutoFlip, None, nextTransition, self._stateMachine._transitionCount)).start()
         
@@ -156,7 +158,7 @@ class _StateFlipping(_StateBase):
         if transition == Transitions.FlipDone:
             return _StateStopped(self._stateMachine)
         elif transition == Transitions.PressPlayAfterAutoFlip:
-            return _StatePlayPressed(self._stateMachine)
+            return _StatePlaying(self._stateMachine)
         else:
             return self.ignoreTransition(transition)
 

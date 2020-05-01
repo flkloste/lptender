@@ -3,7 +3,7 @@ import Servo
 import Gripper
 import RecordPlayer
 from time import sleep
-from threading import Lock
+from threading import RLock
 
 def checkInitialized(func):
     def funcWrap(self, *args, **kwargs):
@@ -22,7 +22,7 @@ class LpTenderImpl(object):
         self._servoRotate = Servo.ServoDS3218_270(self._gpioController, self._config.servo_rotate.gpio)
         self._recordPlayer = RecordPlayer.RecordPlayer(self._gpioController, self._config.record_player.gpio_start, self._config.record_player.gpio_stop, self._config.record_player.gpio_light_barrier)
 
-        self._lock = Lock()
+        self._lock = RLock()
         self._ready = False
 
         self.ROTATE_0 = self._config.servo_rotate.rotate_0
@@ -67,7 +67,7 @@ class LpTenderImpl(object):
         self._recordPlayer.waitUntilStopped()
 
     @checkInitialized
-    def flip(self):
+    def flip(self, autoplay=False):
         if not self._recordPlayer.isStopped():
             raise RuntimeError("Cannot flip: Is not stopped!")
 
@@ -84,6 +84,9 @@ class LpTenderImpl(object):
             sleep(1)
             self._gripper.release()
             sleep(1)
+
+            if autoplay:
+                self.pressPlay()
 
             self._elevator.gotoHome()
             self._servoRotate.setAngle(self.ROTATE_0)
